@@ -2,7 +2,9 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <chrono>
 #include <string>
+#include <format> 
 
 
 ////////////////////////
@@ -40,10 +42,51 @@ bool BitcoinExchange::init(const std::string dbFilePath)
 
 bool BitcoinExchange::execute(std::string inputFile)
 {
-	for (auto& [l, r] : this->db_)
-		std::cout << l << "," << r << std::endl;
-	(void) inputFile;
-	return true;	
+	std::ifstream in(inputFile);
+	if (!in)
+	{
+		std::cout << "failed to open input file." << std::endl;
+		return false;
+	}
+
+	bool visitedFirstLine = false;
+	std::string line;
+	while (std::getline(in, line))
+	{
+		std::istringstream lineStringStream(line);
+		std::string left, right;
+		if (std::getline(lineStringStream, left, '|') && std::getline(lineStringStream, right))
+		{
+			if (visitedFirstLine == false && left == "date" && right == "value")
+			{
+				visitedFirstLine = true;
+				continue; // skip first line
+			}
+			// std::istringstream dateStringStream(left);
+			// std::chrono::year_month_day ymd;
+			// dateStringStream >> std::chrono::parse("%F", ymd); // %F = YYYY-MM-DD
+			// if (!dateStringStream.fail() && ymd.ok())
+			// {
+			// 	// Valid date
+			// }
+			// else
+			// {
+				
+			// }
+			float value;
+			try
+			{
+				value = std::stof(right);
+			}
+			catch(const std::exception& e)
+			{
+				std::cerr << "Failed to parse data.csv float: " << value << ". " << e.what() << std::endl;
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 
@@ -60,15 +103,19 @@ bool BitcoinExchange::setDb(const std::string dbFilePath)
 		return false;
 	}
 
+	bool visitedFirstLine = false;
 	std::string line;
 	while (std::getline(in, line))
 	{
-		std::istringstream lineStrinStream(line);
+		std::istringstream lineStringStream(line);
 		std::string left, right;
-		if (std::getline(lineStrinStream, left, ',') && std::getline(lineStrinStream, right))
+		if (std::getline(lineStringStream, left, ',') && std::getline(lineStringStream, right))
 		{
-			if (left == "date" && right == "exchange_rate")
-				continue;
+			if (visitedFirstLine == false && left == "date" && right == "exchange_rate")
+			{
+				visitedFirstLine = true;
+				continue; // skip first line
+			}
 			float price;
 			try
 			{
