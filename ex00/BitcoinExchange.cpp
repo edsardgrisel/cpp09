@@ -51,6 +51,8 @@ bool BitcoinExchange::execute(std::string inputFile)
     std::string line;
     while (std::getline(in, line))
     {
+        if (line.empty())
+            continue;
         std::string left, right;
 
         size_t pos = line.find(" | ");
@@ -60,10 +62,16 @@ bool BitcoinExchange::execute(std::string inputFile)
             right = line.substr(pos + 3);
         }
 
-        if (visitedFirstLine == false && left == "date" && right == "value")
+        if (visitedFirstLine == false)
         {
             visitedFirstLine = true;
-            continue; // skip first line
+            if (left == "date" && right == "value")
+                continue; // skip first line
+            else
+            {
+                std::cout << "Error: expected first line:'date | value' but got:'" << line << "'" << std::endl;
+                return false;
+            }
         }
         if (!isValidDate(left))
         {
@@ -78,6 +86,7 @@ bool BitcoinExchange::execute(std::string inputFile)
         catch (...)
         {
             std::cout << "Error: bad value input => " << line << std::endl;
+            continue;
         }
         if (value <= 0.0)
         {
