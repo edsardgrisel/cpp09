@@ -3,3 +3,4 @@ build
 btc
 data.csv
 input.txt
+*.json

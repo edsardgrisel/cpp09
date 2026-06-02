@@ -1,6 +1,6 @@
 NAME = btc
 CPP = c++
-CPPFLAGS = -Wall -Werror -Wextra -MMD -std=c++20 
+CPPFLAGS = -Wall -Werror -Wextra -MMD -std=c++20 -g
 
 BUILD_DIR = build
 SRC =	main.cpp \

@@ -12,8 +12,14 @@ int main(int argc, char const *argv[])
 
 	BitcoinExchange exchange;
 	if (exchange.init("data.csv") == false)
+	{
+		std::cout << "failed to init()" << std::endl;
 		return 1;
+	}
 	if (exchange.execute(argv[1]) == false)
+	{
+		std::cout << "failed to execute()" << std::endl;
 		return 1;
+	}
 	return 0;
 }

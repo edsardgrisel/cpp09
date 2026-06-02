@@ -17,7 +17,11 @@ class BitcoinExchange
 
 	private:
 		std::map<std::string, float> db_;
+
 		bool setDb(const std::string dbFilePath);
+		bool isLeapYear(const int year);
+		bool isValidDateFormat(const std::string dateStr);
+		bool isValidDate(const std::string dateStr);
 };
 
 #endif // BITCOINEXCHANGE_HPP
