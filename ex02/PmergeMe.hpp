@@ -17,6 +17,10 @@ public:
 	static float run(std::deque<int>& container);
 
 private:
+	static void sort(std::vector<int>& container);
+	static void sort(std::deque<int>& container);
+
+
 
 };
 
