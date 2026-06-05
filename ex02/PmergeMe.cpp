@@ -2,6 +2,7 @@
 #include "PmergeMe.hpp"
 
 #include <chrono>
+#include <cmath>
 #include <deque>
 #include <vector>
 
@@ -19,6 +20,26 @@ PmergeMe& PmergeMe::operator=(const PmergeMe& other)
 }
 
 PmergeMe::~PmergeMe() {}
+
+int PmergeMe::generateJacobsthal(const int n)
+{
+    if (n <= 0)
+        return 0;
+    if (n == 1)
+        return 1;
+
+    int previousJacobsthal = 0;
+    int currentJacobsthal = 1;
+    int nextJacobsthal = 0;
+
+    for (int index = 2; index <= n; ++index)
+    {
+        nextJacobsthal = currentJacobsthal + 2 * previousJacobsthal;
+        previousJacobsthal = currentJacobsthal;
+        currentJacobsthal = nextJacobsthal;
+    }
+    return currentJacobsthal;
+}
 
 //////////
 // vector
@@ -56,7 +77,6 @@ void PmergeMe::createPairs(std::deque<int>& container, std::deque<int>& winners,
     std::deque<int> newLosers;
 
     size_t containerSize = container.size();
-    int    right;
     size_t i = 0;
     for (; i + 1 < containerSize; i += 2)
     {
@@ -80,6 +100,33 @@ void PmergeMe::createPairs(std::deque<int>& container, std::deque<int>& winners,
     losers = std::move(newLosers);
 }
 
+
+void /*PmergeMe::*/insertRange(size_t firstToInsert, size_t lastToInsert, std::deque<int>& winners, std::deque<int>& losers, const std::deque<int> origWinners)
+{
+    if (firstToInsert > losers.size() - 1)
+        firstToInsert = losers.size() - 1;
+    
+    if (lastToInsert > firstToInsert)
+        return;
+
+    for (size_t i = firstToInsert; i >= lastToInsert; i--)
+    {
+        size_t winnerIndex = 0;
+        for (; winnerIndex < winners.size(); winnerIndex++)
+        {
+            if (winners[winnerIndex] == origWinners[i])
+                break;
+        }
+        std::deque<int>::iterator currentWinnerIt = winners.begin() + winnerIndex;
+        auto insertPos = std::lower_bound(winners.begin(), currentWinnerIt, losers[i]);
+        winners.insert(insertPos, losers[i]);
+
+    }
+    
+    
+    
+}
+
 void PmergeMe::sort(std::deque<int>& winners, std::deque<int>& losers)
 {
     if (winners.size() == 1)
@@ -93,7 +140,7 @@ void PmergeMe::sort(std::deque<int>& winners, std::deque<int>& losers)
 
     for (int& newWinner : newWinners)
     {
-        for (int i = 0; i < winners.size(); i++)
+        for (size_t i = 0; i < winners.size(); i++)
         {
             if (winners[i] == newWinner)
             {
@@ -104,7 +151,26 @@ void PmergeMe::sort(std::deque<int>& winners, std::deque<int>& losers)
     if (losers.size() != winners.size())
         sortedLosers.push_back(losers.back());
 
-    
+    const std::deque<int> constWinners = winners;
+
+
+    int previousJacobsthal = -1;
+    for (int index = 0; ; ++index)
+    {
+        int jacobsthal = generateJacobsthal(index);
+
+        if (jacobsthal == previousJacobsthal)
+            continue;
+
+
+        insertRange(jacobsthal, generateJacobsthal(index - 1) + 1, winners, sortedLosers, constWinners);
+
+        if (jacobsthal >= static_cast<int>(sortedLosers.size()))
+            break;
+
+        previousJacobsthal = jacobsthal;
+
+    }
 }
 
 float PmergeMe::run(std::deque<int>& container)

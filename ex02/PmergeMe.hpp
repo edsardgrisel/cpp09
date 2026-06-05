@@ -16,11 +16,14 @@ class PmergeMe
         static float run(std::deque<int>& container);
 
     private:
+        static int generateJacobsthal(const int num);
+
+
         static void sort(std::vector<int>& winners, std::vector<int>& losers);
         static void sort(std::deque<int>& winners, std::deque<int>& losers);
         static void createPairs(std::vector<int>& winners, std::vector<int>& losers);
-        static void PmergeMe::createPairs(std::deque<int>& container, std::deque<int>& winners,
-                                          std::deque<int>& losers)
+        static void createPairs(std::deque<int>& container, std::deque<int>& winners,
+                                          std::deque<int>& losers);
 };
 
 #endif // PMERGEME_HPP
