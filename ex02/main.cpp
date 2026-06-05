@@ -36,22 +36,9 @@ static void printDeque(std::deque<int> container)
     std::cout << std::endl;
 }
 
-// static int fillContainers(std::vector<int>& vector, std::deque<int>& deque)
-// {
-
-// }
-
-int main(int argc, char const* argv[])
+static bool fillContainers(int argc, char const* argv[], std::vector<int>& vector, std::deque<int>& deque)
 {
-    if (argc == 1)
-    {
-        std::cout << "Provide the numbers as individual arguments" << std::endl;
-        return 1;
-    }
-    std::vector<int>        vector;
-    std::deque<int>         deque;
     std::unordered_set<int> set;
-
     for (int i = 1; i < argc; i++)
     {
         int num;
@@ -62,26 +49,45 @@ int main(int argc, char const* argv[])
         catch (std::exception& e)
         {
             std::cerr << "Failed to convert argument to int. " << e.what() << std::endl;
-            return 1;
+            return false;
         }
         if (num <= 0)
         {
             std::cerr << "Provide positive numbers only." << std::endl;
-            return 1;
+            return false;
         }
         if (!set.insert(num).second)
         {
             std::cerr << "Duplicates not supported." << std::endl;
-            return 1;
+            return false;
         }
         vector.push_back(num);
         deque.push_back(num);
     }
+    return true;
+}
+
+int main(int argc, char const* argv[])
+{
+    if (argc == 1)
+    {
+        std::cout << "Provide the numbers as individual arguments" << std::endl;
+        return 1;
+    }
+    std::vector<int>        vector;
+    std::deque<int>         deque;
+
+    if (!fillContainers(argc, argv, vector, deque))
+        return 1;
+
     std::vector<int> vectorStdSort = vector;
     std::deque<int>  dequeStdSort = deque;
 
-    std::cout << "Before: ";
+    std::cout << "Vector before: ";
     printVector(vector);
+
+    std::cout << "Deque before: ";
+    printDeque(deque);
 
     float vectorTime = PmergeMe::run(vector);
     if (vectorTime < 0)
