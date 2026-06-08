@@ -21,21 +21,6 @@ static void printVector(std::vector<int> container)
     std::cout << std::endl;
 }
 
-static void printDeque(std::deque<int> container)
-{
-    int i = 0;
-    for (int num : container)
-    {
-        if (i++ == 5)
-        {
-            std::cout << "...";
-            break;
-        }
-        std::cout << num << " ";
-    }
-    std::cout << std::endl;
-}
-
 static bool fillContainers(int argc, char const* argv[], std::vector<int>& vector, std::deque<int>& deque)
 {
     std::unordered_set<int> set;
@@ -44,7 +29,13 @@ static bool fillContainers(int argc, char const* argv[], std::vector<int>& vecto
         int num;
         try
         {
-            num = std::stoi(argv[i]);
+            std::size_t index;
+            num = std::stoi(std::string(argv[i]), &index);
+            if (index != std::string(argv[i]).length())
+            {
+                std::cout << "Error: bad value input => " << argv[i] << std::endl;
+                return false;
+            }
         }
         catch (std::exception& e)
         {
@@ -101,6 +92,9 @@ int main(int argc, char const* argv[])
         return 1;
     }
 
+    std::cout << "After: ";
+    printVector(vector);
+
     std::cout << "Time to process a range of " << argc - 1 << " elements with std::" << "vector : " << vectorTime << "us" << std::endl;
     std::cout << "Time to process a range of " << argc - 1 << " elements with std::" << "deque : " << dequeTime << "us" << std::endl;
 
@@ -112,15 +106,12 @@ int main(int argc, char const* argv[])
     else
         std::cout << "Vector sort: FAILED\n";
 
-    if (std::vector<int>(deque.begin(), deque.end()) ==
-        std::vector<int>(dequeStdSort.begin(), dequeStdSort.end()))
+    if (deque == dequeStdSort)
         std::cout << "Deque sort: OK\n";
     else
         std::cout << "Deque sort: FAILED\n";
 
-    std::cout << "Vector after: ";
-    printVector(vector);
-    std::cout << "Deque after: ";
-    printDeque(deque);
+
+
     return 0;
 }

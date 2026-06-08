@@ -32,7 +32,6 @@ bool BitcoinExchange::init(const std::string dbFilePath)
 {
     if (setDb(dbFilePath) == false)
     {
-
         return false;
     }
     return true;
@@ -69,7 +68,8 @@ bool BitcoinExchange::execute(std::string inputFile)
                 continue; // skip first line
             else
             {
-                std::cout << "Error: expected first line:'date | value' but got:'" << line << "'" << std::endl;
+                std::cout << "Error: expected first line:'date | value' but got:'" << line << "'"
+                          << std::endl;
                 return false;
             }
         }
@@ -81,7 +81,13 @@ bool BitcoinExchange::execute(std::string inputFile)
         float value;
         try
         {
-            value = std::stof(right);
+            std::size_t index;
+            value = std::stof(right, &index);
+            if (index != right.length())
+            {
+                std::cout << "Error: bad value input => " << line << std::endl;
+                continue;
+            }
         }
         catch (...)
         {
@@ -153,7 +159,13 @@ bool BitcoinExchange::setDb(const std::string dbFilePath)
             float price;
             try
             {
-                price = std::stof(right);
+                std::size_t index;
+                price = std::stof(right, &index);
+                if (index != right.length())
+                {
+                    std::cout << "Error: bad value input => " << line << std::endl;
+                    return false;
+                }
             }
             catch (const std::exception& e)
             {
