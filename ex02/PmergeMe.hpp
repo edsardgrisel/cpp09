@@ -2,8 +2,8 @@
 #define PMERGEME_HPP
 
 #include <deque>
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 class PmergeMe
 {
@@ -13,20 +13,25 @@ class PmergeMe
         PmergeMe& operator=(const PmergeMe& other);
         ~PmergeMe();
 
-        static float run(std::vector<int>& container);
-        static float run(std::deque<int>& container);
+        template <typename Container>
+        static float run(Container& container);
 
     private:
         static int generateJacobsthal(const int num);
 
+        template <typename Container>
+        static void sort(Container& winners, Container& losers);
 
-        static void sort(std::vector<int>& winners, std::vector<int>& losers);
-        static void sort(std::deque<int>& winners, std::deque<int>& losers);
-        static void createPairs(std::vector<int>& winners, std::vector<int>& losers);
-        static void createPairs(std::deque<int>& container, std::deque<int>& winners,
-                                          std::deque<int>& losers);
-        static void insertRange(std::size_t firstToInsert, std::size_t lastToInsert, std::deque<int>& winners,
-                                std::deque<int>& sortedLosers, const std::deque<int> origWinners);
+        template <typename Container>
+        static void createPairs(Container& container, Container& winners, Container& losers);
+
+        template <typename Container>
+        static void insertRange(std::size_t firstToInsert, std::size_t lastToInsert,
+                                Container& winners, Container& sortedLosers,
+                                const Container& origWinners);
 };
+
+extern template float PmergeMe::run<std::vector<int>>(std::vector<int>& container);
+extern template float PmergeMe::run<std::deque<int>>(std::deque<int>& container);
 
 #endif // PMERGEME_HPP

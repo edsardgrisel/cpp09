@@ -3,8 +3,8 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cmath>
 #include <deque>
+#include <utility>
 #include <vector>
 
 PmergeMe::PmergeMe() {}
@@ -42,46 +42,35 @@ int PmergeMe::generateJacobsthal(const int n)
     return currentJacobsthal;
 }
 
-//////////
-// vector
-//////////
-
-// void PmergeMe::createPairs(std::vector<int>& winners, std::vector<int>& losers){}
-
-void PmergeMe::sort(std::vector<int>& winners, std::vector<int>& losers)
+template <typename Container> float PmergeMe::run(Container& container)
 {
-    (void)winners;
-    (void)losers;
-}
+    const std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
-float PmergeMe::run(std::vector<int>& container)
-{
-    (void)container;
-    std::chrono::_V2::system_clock::time_point start = std::chrono::high_resolution_clock::now();
+    Container winners;
+    Container losers;
 
-    // sort(container);
+    createPairs(container, winners, losers);
+    sort(winners, losers);
 
-    std::chrono::_V2::system_clock::time_point end = std::chrono::high_resolution_clock::now();
-    std::chrono::microseconds::rep             timeDifference =
-        std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    container = winners;
+
+    const std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    const std::chrono::microseconds::rep timeDifference = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     return static_cast<float>(timeDifference);
 }
 
-//////////
-// deque
-//////////
-
-void PmergeMe::createPairs(std::deque<int>& container, std::deque<int>& winners, std::deque<int>& losers)
+template <typename Container>
+void PmergeMe::createPairs(Container& container, Container& winners, Container& losers)
 {
-    std::deque<int> newWinners;
-    std::deque<int> newLosers;
+    Container newWinners;
+    Container newLosers;
 
-    size_t containerSize = container.size();
-    size_t i = 0;
+    std::size_t containerSize = container.size();
+    std::size_t i = 0;
     for (; i + 1 < containerSize; i += 2)
     {
-        int left = container[i];
-        int right = container[i + 1];
+        typename Container::value_type left = container[i];
+        typename Container::value_type right = container[i + 1];
         if (left > right)
         {
             newWinners.push_back(left);
@@ -100,8 +89,9 @@ void PmergeMe::createPairs(std::deque<int>& container, std::deque<int>& winners,
     losers = std::move(newLosers);
 }
 
-void PmergeMe::insertRange(size_t firstToInsert, size_t lastToInsert, std::deque<int>& winners,
-                                std::deque<int>& sortedLosers, const std::deque<int> origWinners)
+template <typename Container>
+void PmergeMe::insertRange(std::size_t firstToInsert, std::size_t lastToInsert, Container& winners,
+                           Container& sortedLosers, const Container& origWinners)
 {
     if (sortedLosers.empty())
         return;
@@ -114,57 +104,54 @@ void PmergeMe::insertRange(size_t firstToInsert, size_t lastToInsert, std::deque
 
     for (int li = static_cast<int>(firstToInsert); li >= static_cast<int>(lastToInsert); --li)
     {
-        if (static_cast<size_t>(li) < origWinners.size())
+        if (static_cast<std::size_t>(li) < origWinners.size())
         {
-            int winnerValue = origWinners[li];
-            std::deque<int>::iterator currentWinnerIt = std::find(winners.begin(), winners.end(), winnerValue);
+            typename Container::value_type winnerValue = origWinners[li];
+            typename Container::iterator   currentWinnerIt = std::find(winners.begin(), winners.end(), winnerValue);
 
             if (currentWinnerIt == winners.end())
                 continue;
 
-            std::deque<int>::iterator insertPos = std::lower_bound(winners.begin(), currentWinnerIt, sortedLosers[li]);
+            typename Container::iterator insertPos = std::lower_bound(winners.begin(), currentWinnerIt, sortedLosers[li]);
             winners.insert(insertPos, sortedLosers[li]);
         }
         else
         {
-            // insert the unpaired loser if present
-            auto insertPos = std::lower_bound(winners.begin(), winners.end(), sortedLosers[li]);
+            typename Container::iterator insertPos = std::lower_bound(winners.begin(), winners.end(), sortedLosers[li]);
             winners.insert(insertPos, sortedLosers[li]);
         }
     }
 }
 
-void PmergeMe::sort(std::deque<int>& winners, std::deque<int>& losers)
+template <typename Container> void PmergeMe::sort(Container& winners, Container& losers)
 {
     if (winners.size() <= 1)
     {
-        std::deque<int> origWinners = winners;
+        Container origWinners = winners;
         if (!losers.empty())
             insertRange(losers.size() - 1, 0, winners, losers, origWinners);
         losers.clear();
         return;
     }
 
-    std::deque<int> newWinners;
-    std::deque<int> newLosers;
+    Container newWinners;
+    Container newLosers;
     createPairs(winners, newWinners, newLosers);
     sort(newWinners, newLosers);
-    std::deque<int> sortedLosers;
+    Container sortedLosers;
 
-    for (int& newWinner : newWinners)
+    for (typename Container::value_type newWinner : newWinners)
     {
-        for (size_t i = 0; i < winners.size(); i++)
+        for (std::size_t i = 0; i < winners.size(); i++)
         {
             if (winners[i] == newWinner)
-            {
                 sortedLosers.push_back(losers[i]);
-            }
         }
     }
     if (losers.size() != winners.size())
         sortedLosers.push_back(losers.back());
 
-    const std::deque<int> origWinners = newWinners;
+    const Container origWinners = newWinners;
 
     int previousJacobsthal = -1;
     for (int index = 0;; ++index)
@@ -174,20 +161,19 @@ void PmergeMe::sort(std::deque<int>& winners, std::deque<int>& losers)
         if (jacobsthal == previousJacobsthal)
             continue;
 
-        // insert remaining losers beyond the last jacobsthal number that fits in the list length
         if (jacobsthal >= static_cast<int>(sortedLosers.size()))
         {
             int last = static_cast<int>(sortedLosers.size()) - 1;
             if (last >= previousJacobsthal + 1)
-                insertRange(static_cast<size_t>(last), static_cast<size_t>(previousJacobsthal + 1),
-                            newWinners, sortedLosers, origWinners);
+                insertRange(static_cast<std::size_t>(last),
+                            static_cast<std::size_t>(previousJacobsthal + 1), newWinners,
+                            sortedLosers, origWinners);
             break;
         }
 
-        // insert range [previousJacobsthal+1 .. jacobsthal] (right-to-left inside)
         if (jacobsthal >= previousJacobsthal + 1)
-            insertRange(static_cast<size_t>(jacobsthal),
-                        static_cast<size_t>(previousJacobsthal + 1), newWinners, sortedLosers,
+            insertRange(static_cast<std::size_t>(jacobsthal),
+                        static_cast<std::size_t>(previousJacobsthal + 1), newWinners, sortedLosers,
                         origWinners);
 
         previousJacobsthal = jacobsthal;
@@ -196,22 +182,5 @@ void PmergeMe::sort(std::deque<int>& winners, std::deque<int>& losers)
     winners = std::move(newWinners);
 }
 
-float PmergeMe::run(std::deque<int>& container)
-{
-    (void)container;
-
-    std::chrono::_V2::system_clock::time_point start = std::chrono::high_resolution_clock::now();
-
-    std::deque<int> winners;
-    std::deque<int> losers;
-
-    createPairs(container, winners, losers);
-    sort(winners, losers);
-
-    container = winners;
-
-    std::chrono::_V2::system_clock::time_point end = std::chrono::high_resolution_clock::now();
-    std::chrono::microseconds::rep             timeDifference =
-        std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    return static_cast<float>(timeDifference);
-}
+template float PmergeMe::run<std::vector<int>>(std::vector<int>& container);
+template float PmergeMe::run<std::deque<int>>(std::deque<int>& container);

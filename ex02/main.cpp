@@ -83,11 +83,10 @@ int main(int argc, char const* argv[])
     std::vector<int> vectorStdSort = vector;
     std::deque<int>  dequeStdSort = deque;
 
-    std::cout << "Vector before: ";
+    std::cout << "Before: ";
     printVector(vector);
 
-    std::cout << "Deque before: ";
-    printDeque(deque);
+
 
     float vectorTime = PmergeMe::run(vector);
     if (vectorTime < 0)
