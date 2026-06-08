@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <vector>
+#include <cstddef>
 
 class PmergeMe
 {
@@ -24,6 +25,8 @@ class PmergeMe
         static void createPairs(std::vector<int>& winners, std::vector<int>& losers);
         static void createPairs(std::deque<int>& container, std::deque<int>& winners,
                                           std::deque<int>& losers);
+        static void insertRange(std::size_t firstToInsert, std::size_t lastToInsert, std::deque<int>& winners,
+                                std::deque<int>& sortedLosers, const std::deque<int> origWinners);
 };
 
 #endif // PMERGEME_HPP

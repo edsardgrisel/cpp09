@@ -71,8 +71,7 @@ float PmergeMe::run(std::vector<int>& container)
 // deque
 //////////
 
-void PmergeMe::createPairs(std::deque<int>& container, std::deque<int>& winners,
-                           std::deque<int>& losers)
+void PmergeMe::createPairs(std::deque<int>& container, std::deque<int>& winners, std::deque<int>& losers)
 {
     std::deque<int> newWinners;
     std::deque<int> newLosers;
@@ -101,7 +100,7 @@ void PmergeMe::createPairs(std::deque<int>& container, std::deque<int>& winners,
     losers = std::move(newLosers);
 }
 
-void /*PmergeMe::*/ insertRange(size_t firstToInsert, size_t lastToInsert, std::deque<int>& winners,
+void PmergeMe::insertRange(size_t firstToInsert, size_t lastToInsert, std::deque<int>& winners,
                                 std::deque<int>& sortedLosers, const std::deque<int> origWinners)
 {
     if (sortedLosers.empty())
